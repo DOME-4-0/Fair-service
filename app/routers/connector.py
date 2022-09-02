@@ -105,13 +105,13 @@ def Search_API (platform_name, results_type):
         query_base_url_structures= query_base_url+"structures"
 
     if results_type == "references":
-        query_base_url_structures= query_base_url+"references"
+        query_base_url_references= query_base_url+"references"
     
     if results_type == "info":
-        query_base_url_structures= query_base_url+"info"
+        query_base_url_info= query_base_url+"info"
     
     if results_type == "Links":
-        query_base_url_structures= query_base_url+"Links"
+        query_base_url_Links= query_base_url+"links"
 
     return query_base_url_structures
 
@@ -139,7 +139,7 @@ def searching(search_string, platform_name,results_type):
             item = {
                 "keyword": attrs["chemical_formula_descriptive"],
                 "dataCreator": platform_name,
-                "URL": URL_optimade+entry["id"],
+                "URL": Search_URL_base+entry["id"],
                 "data": json.dumps(entry, sort_keys=True, indent=4),
             }
             searched_results.append(item)
