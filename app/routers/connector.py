@@ -1,5 +1,6 @@
 import json
 import re
+from sre_constants import ANY
 import periodictable
 import requests
 
@@ -40,17 +41,17 @@ async def platform_name(platform_string:str):
 
 
 @router.get("/results")
-async def searching(
+async def search_results(
     search_string: Optional[str] = Query(None),
     platform_name: Optional[str] = Query(None),
-    results_type: "structures"):
+    results_type: Optional[str] = Query(None)):
 
     Search_URL_base = Search_API(platform_name, results_type)
     print(Search_URL_base)
     searched_results=[]
 
     if platform_name =="Pubchem":
-        res = requests.get(Search_URL_base, params=dict(page_limit=10)).json()
+        res = requests.get(f"{Search_URL_base}{search_string}/record/JSON?callback=pubchem_callback", params=dict(page_limit=10)).json()
 
     elif platform_name == "Chemeo":
         res = requests.get(f"{Search_URL_base}?q={search_string}").json()
@@ -76,12 +77,9 @@ async def searching(
     except:
         return []
     
-    return(searched_results)
+    return searched_results
 
-
-
-
-def searched_platform(self, platform):
+def searched_platform(platform):
         if platform == "":
             return print("No platform has been entered! Please enter a valid platform")
         
