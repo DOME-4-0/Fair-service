@@ -40,8 +40,48 @@ async def platform_name(platform_string:str):
 
 
 @router.get("/results")
+async def searching(
+    search_string: Optional[str] = Query(None),
+    platform_name: Optional[str] = Query(None),
+    results_type: "structures"):
 
-async def searched_platform(self, platform):
+    Search_URL_base = Search_API(platform_name, results_type)
+    print(Search_URL_base)
+    searched_results=[]
+
+    if platform_name =="Pubchem":
+        res = requests.get(Search_URL_base, params=dict(page_limit=10)).json()
+
+    elif platform_name == "Chemeo":
+        res = requests.get(f"{Search_URL_base}?q={search_string}").json()
+
+    else: 
+        elements =search_string_split(search_string)
+        elements_str = ", ".join([f'"{el}"' for el in elements])
+        filters = f"(elements HAS ALL {elements_str})"
+        res = requests.get(Search_URL_base, params=dict(filter=filters, page_limit=10)).json()
+    
+    #if res ==[]:
+    #     NameError: "Wrong query parameters have been entered"
+    try:
+        for entry in res["data"]:
+            attrs = entry["attributes"]
+            item = {
+                "keyword": attrs["chemical_formula_descriptive"],
+                "dataCreator": platform_name,
+                "URL": Search_URL_base+entry["id"],
+                "data": json.dumps(entry, sort_keys=True, indent=4),
+            }
+            searched_results.append(item)
+    except:
+        return []
+    
+    return(searched_results)
+
+
+
+
+def searched_platform(self, platform):
         if platform == "":
             return print("No platform has been entered! Please enter a valid platform")
         
@@ -118,40 +158,6 @@ def Search_API (platform_name, results_type):
 
     return query_base_url
 
-def searching(search_string, platform_name,results_type):
-
-    Search_URL_base = Search_API(platform_name, results_type)
-    print(Search_URL_base)
-    searched_results=[]
-
-    if platform_name =="Pubchem":
-        res = requests.get(Search_URL_base, params=dict(page_limit=10)).json()
-
-    elif platform_name == "Chemeo":
-        res = requests.get(f"{Search_URL_base}?q={search_string}").json()
-
-    else: 
-        elements =search_string_split(search_string)
-        elements_str = ", ".join([f'"{el}"' for el in elements])
-        filters = f"(elements HAS ALL {elements_str})"
-        res = requests.get(Search_URL_base, params=dict(filter=filters, page_limit=10)).json()
-    
-    #if res ==[]:
-    #     NameError: "Wrong query parameters have been entered"
-    try:
-        for entry in res["data"]:
-            attrs = entry["attributes"]
-            item = {
-                "keyword": attrs["chemical_formula_descriptive"],
-                "dataCreator": platform_name,
-                "URL": Search_URL_base+entry["id"],
-                "data": json.dumps(entry, sort_keys=True, indent=4),
-            }
-            searched_results.append(item)
-    except:
-        return []
-    
-    return(searched_results)
 
 
 #print(Search_API(platform_name='Materials Project',results_type='structures'))
