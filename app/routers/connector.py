@@ -94,15 +94,8 @@ def Search_API (platform_name, results_type):
         platform_string = Optimade_platform_end.get(platform_name)
         query_base_url = f"https://{platform_string}/optimade/v1/"
 
-    elif platform_name == 'JARVIS-DFT':
-        query_base_url = "https://jarvis.nist.gov/optimade/jarvisdft/v1/"
-
-    
-    elif platform_name == "Pubchem":
-        query_base_url = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"
-
     if results_type == "structures":
-        query_base_url_structures= query_base_url+"structures"
+        query_base_url= query_base_url+"structures"
 
     if results_type == "references":
         query_base_url_references= query_base_url+"references"
@@ -112,9 +105,18 @@ def Search_API (platform_name, results_type):
     
     if results_type == "Links":
         query_base_url_Links= query_base_url+"links"
+    
+    elif platform_name == 'JARVIS-DFT':
+        query_base_url = "https://jarvis.nist.gov/optimade/jarvisdft/v1/"
 
-    return query_base_url_structures
+    
+    elif platform_name == "Pubchem":
+        query_base_url = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"
 
+    elif platform_name == "Chemeo":
+        query_base_url =  "https://www.chemeo.com/api/v1/search"
+
+    return query_base_url
 
 def searching(search_string, platform_name,results_type):
 
@@ -124,6 +126,9 @@ def searching(search_string, platform_name,results_type):
 
     if platform_name =="Pubchem":
         res = requests.get(Search_URL_base, params=dict(page_limit=10)).json()
+
+    elif platform_name == "Chemeo":
+        res = requests.get(f"{Search_URL_base}?q={search_string}").json()
 
     else: 
         elements =search_string_split(search_string)
