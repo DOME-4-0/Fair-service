@@ -3,11 +3,7 @@ import re
 from sre_constants import ANY
 import periodictable
 import requests
-
-import json
 from typing import List, Optional
-
-import requests  # type: ignore
 from fastapi import APIRouter, Query
 
 router = APIRouter()

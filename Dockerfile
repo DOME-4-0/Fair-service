@@ -22,7 +22,7 @@ COPY . .
 
 # Run static security check and linters
 RUN bandit -r app \
-  && safety check -r requirements.txt --bare \
+  && safety check -r requirements.txt \
   && pylint app \
   && mypy app 
 
