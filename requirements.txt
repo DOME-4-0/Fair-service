@@ -1,9 +1,5 @@
 bandit
 fastapi==0.75.2
-<<<<<<< HEAD
-=======
-fastapi==0.75.2
->>>>>>> 36d0f3e9e4dc21074925e0fbfb559ba50ef7c0e8
 gunicorn==20.1.0
 itsdangerous==2.0.1
 Jinja2
@@ -14,8 +10,4 @@ pymongo
 requests
 safety
 urllib3
-<<<<<<< HEAD
 WTForms==3.0.1
-=======
-WTForms==3.0.1
->>>>>>> 36d0f3e9e4dc21074925e0fbfb559ba50ef7c0e8
