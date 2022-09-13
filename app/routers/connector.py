@@ -30,7 +30,6 @@ async def search_results(
     searched_results = []
     if platform_name == "Pubchem":
         base_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{search_string}/record/JSON?callback=pubchem_callback"
-        searched_results = []
         res_base = requests.get(base_url, params=dict(page_limit=10)).json()
         # print(res)
         chemical_pubchem_results = res_base["PC_Compounds"][0]
