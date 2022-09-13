@@ -2,10 +2,10 @@
 import json
 import re
 from typing import List
+from operator import itemgetter
 import periodictable  # type: ignore
 import requests  # type: ignore
 from fastapi import APIRouter
-from operator import itemgetter
 
 router = APIRouter()
 
@@ -28,7 +28,7 @@ async def search_results(
     search_url_base = search_api(platform_name)
     print(search_url_base)
     searched_results = []
-
+    # pylint: disable-msg=too-many-locals
     if platform_name == "Pubchem":
         base_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{search_string}/record/JSON?callback=pubchem_callback"
         searched_results = []
@@ -40,9 +40,8 @@ async def search_results(
         pubchem_chem_hazard_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/{cid_id}/JSON/?response_type=display&heading=GHS%20Classification"
         res_chemical_hazard = requests.get(
             pubchem_chem_hazard_url, params=dict(page_limit=10)).json()
-        GHZ_hazard_statements = res_chemical_hazard['Record']['Section'][0][
+        ghz_hazard_statements = res_chemical_hazard['Record']['Section'][0][
             'Section'][0]['Section'][0]['Information'][2]['Value']['StringWithMarkup']
-        # print(GHZ_hazard_statements)
         property_pubchem = chemical_pubchem_results.get('props')
         name = property_pubchem[11]["value"]["sval"]
         name = ' '.join(w for w in re.split(r"\W", name)
@@ -51,7 +50,7 @@ async def search_results(
             "keyword": name,
             "dataCreator": "PubChem",
             "URL": base_url,
-            "Hazard_information": json.dumps(GHZ_hazard_statements, sort_keys=True, indent=4),
+            "Hazard_information": json.dumps(ghz_hazard_statements, sort_keys=True, indent=4),
             "data": json.dumps(itemgetter('atoms', 'coords', 'props')(chemical_pubchem_results), sort_keys=True, indent=4)
         }
         searched_results.append(item)
