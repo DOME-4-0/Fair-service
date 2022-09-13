@@ -10,7 +10,7 @@ from fastapi import APIRouter
 router = APIRouter()
 
 # pylint:disable=line-too-long
-
+# pylint: disable=too-many-locals
 
 @router.get("/test")
 async def test():
@@ -28,7 +28,6 @@ async def search_results(
     search_url_base = search_api(platform_name)
     print(search_url_base)
     searched_results = []
-    # pylint: disable-msg=too-many-locals
     if platform_name == "Pubchem":
         base_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{search_string}/record/JSON?callback=pubchem_callback"
         searched_results = []
