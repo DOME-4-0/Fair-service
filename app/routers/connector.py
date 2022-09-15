@@ -120,7 +120,7 @@ def search_api(platform_name):
     # (Worked) AFLOW: http://aflow.org/API/optimade
     # (Worked) Theoretical Crystallography Open Database: https://www.crystallography.net/tcod/optimade
     # (Worked) The Open Quantum Materials: http://oqmd.org/optimade
-    # (Worked) JARVIS-DFT: https://jarvis.nist.gov/optimade/jarvisdft
+    # (Worked) JARVIS_DFT: https://jarvis.nist.gov/optimade/jarvisdft
     # In total, four types of results can be returned from the queries, links, references, structures, info.
     optimade_platform_front = {'Materials Project': 'materialsproject.org',
                                'Open Database Xtals': 'odbx.science'}
@@ -150,7 +150,7 @@ def search_api(platform_name):
     # if results_type == "Links":
     #    query_base_url_links = query_base_url+"links"
 
-    elif platform_name == 'JARVIS-DFT':
+    elif platform_name == 'JARVIS_DFT':
         query_base_url = "https://jarvis.nist.gov/optimade/jarvisdft/v1/structures"
 
     # elif platform_name == '2DMatpedia':
@@ -168,4 +168,4 @@ def search_api(platform_name):
 
 
 #print(search_api(platform_name='Materials Project',results_type='structures'))
-#print(searching(search_string ='carbon',platform_name='JARVIS-DFT',results_type='structures'))
+#print(searching(search_string ='carbon',platform_name='JARVIS_DFT',results_type='structures'))
