@@ -25,10 +25,11 @@ async def search_results(
         search_string: str,
         platform_name: str):
     """helps to connect to data platforms"""
+    print(platform_name)
     search_url_base = search_api(platform_name)
     print(search_url_base)
     searched_results = []
-    if platform_name == "Pubchem":
+    if platform_name == "PUBCHEM":
         base_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{search_string}/record/JSON?callback=pubchem_callback"
         res_base = requests.get(base_url, params=dict(page_limit=10)).json()
         # print(res)
@@ -52,7 +53,7 @@ async def search_results(
             "data": json.dumps(itemgetter('atoms', 'coords', 'props')(chemical_pubchem_results), sort_keys=True, indent=4)
         }
         searched_results.append(item)
-    elif platform_name == "Chemeo":
+    elif platform_name == "CHEMEO":
         try:
             search_url_chemeo = f"{search_url_base}?q={search_string}"
             res = requests.get(search_url_chemeo).json()
@@ -88,6 +89,7 @@ async def search_results(
                 searched_results.append(item)
         except ValueError:
             return []
+        #print(searched_results)
     return searched_results
 
 
@@ -122,12 +124,12 @@ def search_api(platform_name):
     # (Worked) The Open Quantum Materials: http://oqmd.org/optimade
     # (Worked) JARVIS_DFT: https://jarvis.nist.gov/optimade/jarvisdft
     # In total, four types of results can be returned from the queries, links, references, structures, info.
-    optimade_platform_front = {'Materials Project': 'materialsproject.org',
-                               'Open Database Xtals': 'odbx.science'}
-    optimade_platform_end = {'Novel Materials Discovery': 'nomad-lab.eu/prod/rae', 'AFLOW': 'aflow.org/API',
-                             'The Open Quantum Materials': 'oqmd.org'}
-    new_optimade_cod_api = {'Theoretical Crystallography Open Database': 'crystallography.net/tcod',
-                            'Crystallography': 'crystallography.net/cod'}
+    optimade_platform_front = {'MATERIALSPROJECT': 'materialsproject.org',
+                               'OPEN_DATABASE_XTALS': 'odbx.science'}
+    optimade_platform_end = {'NOWAD': 'nomad-lab.eu/prod/rae', 'AFLOW': 'aflow.org/API',
+                             'THE_OPEN_QUANTUM_MATERIALS': 'oqmd.org'}
+    new_optimade_cod_api = {'THEORETICAL_CRYSTALLOGRAPHY_OPEN_DATABASE': 'crystallography.net/tcod',
+                            'CRYSTALLOGRAPHY': 'crystallography.net/cod'}
     #optimade_results_types = ['structures', 'references', 'info', 'Links']
     if platform_name in optimade_platform_front:
         platform_string = optimade_platform_front.get(platform_name)
@@ -155,10 +157,10 @@ def search_api(platform_name):
 
     # elif platform_name == '2DMatpedia':
     #   query_base_url = "https://www.optimade.2dmatpedia.org/v1/structures"
-    elif platform_name == "Pubchem":
+    elif platform_name == "PUBCHEM":
         query_base_url = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"
 
-    elif platform_name == "Chemeo":
+    elif platform_name == "CHEMEO":
         query_base_url = "https://www.chemeo.com/api/v1/search"
 
     else:
