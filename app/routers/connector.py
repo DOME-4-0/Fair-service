@@ -57,8 +57,8 @@ async def search_results(
         try:
             search_url_chemeo = f"{search_url_base}?q={search_string}"
             res = requests.get(search_url_chemeo).json()
-            if res["compounds"]:
-                for compound in res["compounds"]:
+            if res["comps"]:
+                for compound in res["comps"]:
                     # print(compound["other_names"][0])
                     name = compound["other_names"][0]
                     print(name)
