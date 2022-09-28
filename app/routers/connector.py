@@ -58,10 +58,11 @@ async def search_results(
         try:
             search_url_chemeo = f"{search_url_base}?q={search_string}"
             res = requests.get(search_url_chemeo).json()
+            print(search_url_chemeo)
             if res["comps"]:
                 for compound in res["comps"]:
                     # print(compound["other_names"][0])
-                    name = compound["other_names"][0]
+                    name = compound["compound"]
                     print(name)
                     item = {
                         "keyword": name,
@@ -69,8 +70,9 @@ async def search_results(
                         "URL": f"https://www.chemeo.com/api/v1/search?q={name}",
                         "data": json.dumps(compound, sort_keys=True, indent=4),
                     }
+                    print(item)
                     searched_results.append(item)
-            print(searched_results)
+            #print(searched_results)
         except KeyError:
             pass
     else:
@@ -79,6 +81,7 @@ async def search_results(
         filters = f"(elements HAS ALL {elements_str})"
         res = requests.get(search_url_base, params=dict(
             filter=filters, page_limit=10)).json()
+        print(res)
         try:
             for entry in res["data"]:
                 attrs = entry["attributes"]
