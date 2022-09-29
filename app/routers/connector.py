@@ -46,11 +46,11 @@ async def search_results(
         name = property_pubchem[11]["value"]["sval"]
         name = ' '.join(w for w in re.split(r"\W", name)
                         if w)  # pylint: disable=W1401
-        chemical_Data =json.dumps(itemgetter('atoms', 'coords', 'props')(chemical_pubchem_results), sort_keys=True, indent=4)
-        Hazard_information =json.dumps(ghz_hazard_statements, sort_keys=True, indent=4)
+        chemical_data =json.dumps(itemgetter('atoms', 'coords', 'props')(chemical_pubchem_results), sort_keys=True, indent=4)
+        hazard_information =json.dumps(ghz_hazard_statements, sort_keys=True, indent=4)
         data_results = {"id":cid_id,
-                "chemical_data": chemical_Data,
-                "Hazard_information": Hazard_information}
+                "chemical_data": chemical_data,
+                "Hazard_information": hazard_information}
         item = {
             "keyword": name,
             "dataCreator": "PubChem",
