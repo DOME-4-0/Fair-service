@@ -99,8 +99,13 @@ async def search_results(
         except ValueError:
             return []
         except KeyError:
+<<<<<<< HEAD
             return ["Please try entering another keywords"]
     #print(searched_results)
+=======
+            return []
+    print(searched_results)
+>>>>>>> 0fac8a60aeccc4d53a53ddb4165fbe44165e3e67
     return searched_results
 
 
