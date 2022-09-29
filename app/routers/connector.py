@@ -12,6 +12,7 @@ router = APIRouter()
 # pylint:disable=line-too-long
 # pylint: disable=too-many-locals
 
+
 @router.get("/test")
 async def test():
     """
@@ -25,9 +26,9 @@ async def search_results(
         search_string: str,
         platform_name: str):
     """helps to connect to data platforms"""
-    print(platform_name)
+    #print(platform_name)
     search_url_base = search_api(platform_name)
-    print(search_url_base)
+    #print(search_url_base)
     searched_results = []
     if platform_name == "PUBCHEM":
         base_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{search_string}/record/JSON?callback=pubchem_callback"
@@ -45,34 +46,37 @@ async def search_results(
         name = property_pubchem[11]["value"]["sval"]
         name = ' '.join(w for w in re.split(r"\W", name)
                         if w)  # pylint: disable=W1401
+        chemical_Data =json.dumps(itemgetter('atoms', 'coords', 'props')(chemical_pubchem_results), sort_keys=True, indent=4)
+        Hazard_information =json.dumps(ghz_hazard_statements, sort_keys=True, indent=4)
+        data_results = {"id":cid_id,
+                "chemical_data": chemical_Data,
+                "Hazard_information": Hazard_information}
         item = {
             "keyword": name,
             "dataCreator": "PubChem",
             "URL": base_url,
-            "Hazard_information": json.dumps(ghz_hazard_statements, sort_keys=True, indent=4),
-            "data": json.dumps(itemgetter('atoms', 'coords', 'props')(chemical_pubchem_results), sort_keys=True, indent=4)
+            "data": json.dumps(data_results,sort_keys=True, separators=(', ', ': '), indent=4)
         }
         searched_results.append(item)
+        print(item["data"])
 
     elif platform_name == "CHEMEO":
         try:
             search_url_chemeo = f"{search_url_base}?q={search_string}"
             res = requests.get(search_url_chemeo).json()
-            print(search_url_chemeo)
+            #print(search_url_chemeo)
             if res["comps"]:
                 for compound in res["comps"]:
                     # print(compound["other_names"][0])
                     name = compound["compound"]
-                    print(name)
                     item = {
                         "keyword": name,
                         "dataCreator": "Chemeo",
                         "URL": f"https://www.chemeo.com/api/v1/search?q={name}",
                         "data": json.dumps(compound, sort_keys=True, indent=4),
                     }
-                    print(item)
                     searched_results.append(item)
-            #print(searched_results)
+            # print(searched_results)
         except KeyError:
             pass
     else:
@@ -81,7 +85,7 @@ async def search_results(
         filters = f"(elements HAS ALL {elements_str})"
         res = requests.get(search_url_base, params=dict(
             filter=filters, page_limit=10)).json()
-        print(res)
+        #print(res)
         try:
             for entry in res["data"]:
                 attrs = entry["attributes"]
@@ -94,7 +98,9 @@ async def search_results(
                 searched_results.append(item)
         except ValueError:
             return []
-    print(searched_results)
+        except KeyError:
+            return ["Please try entering another keywords"]
+    #print(searched_results)
     return searched_results
 
 
