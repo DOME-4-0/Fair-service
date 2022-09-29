@@ -94,6 +94,8 @@ async def search_results(
                 searched_results.append(item)
         except ValueError:
             return []
+        except KeyError:
+            return []
     print(searched_results)
     return searched_results
 
