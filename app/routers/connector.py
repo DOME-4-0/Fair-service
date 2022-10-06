@@ -170,3 +170,4 @@ def search_api(platform_name):
         query_base_url = " "
 
     return query_base_url
+
