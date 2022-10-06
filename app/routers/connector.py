@@ -55,7 +55,6 @@ async def search_results(
             "data": json.dumps(data_results,sort_keys=True, separators=(', ', ': '), indent=4)
         }
         searched_results.append(item)
-        print(item["data"])
 
     elif platform_name == "CHEMEO":
         try:
@@ -137,7 +136,6 @@ def search_api(platform_name):
     if platform_name in optimade_platform_front:
         platform_string = optimade_platform_front.get(platform_name)
         query_base_url = f"https://optimade.{platform_string}/v1/structures"
-        print(query_base_url)
 
     elif platform_name in optimade_platform_end:
         platform_string = optimade_platform_end.get(platform_name)
