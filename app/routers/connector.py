@@ -92,7 +92,7 @@ async def search_results(
         except ValueError:
             return []
         except KeyError:
-            return ["Please try entering another keywords"]
+            return []
     return searched_results
 
 
