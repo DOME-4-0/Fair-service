@@ -171,3 +171,6 @@ def search_api(platform_name):
 
     return query_base_url
 
+
+#print(search_api(platform_name='Materials Project',results_type='structures'))
+#print(searching(search_string ='carbon',platform_name='JARVIS_DFT',results_type='structures'))
