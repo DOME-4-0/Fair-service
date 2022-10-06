@@ -26,14 +26,11 @@ async def search_results(
         search_string: str,
         platform_name: str):
     """helps to connect to data platforms"""
-    #print(platform_name)
     search_url_base = search_api(platform_name)
-    #print(search_url_base)
     searched_results = []
     if platform_name == "PUBCHEM":
         base_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{search_string}/record/JSON?callback=pubchem_callback"
         res_base = requests.get(base_url, params=dict(page_limit=10)).json()
-        # print(res)
         chemical_pubchem_results = res_base["PC_Compounds"][0]
         cid_id = chemical_pubchem_results.get(
             'id', {}).get('id', {}).get('cid')
@@ -64,10 +61,8 @@ async def search_results(
         try:
             search_url_chemeo = f"{search_url_base}?q={search_string}"
             res = requests.get(search_url_chemeo).json()
-            #print(search_url_chemeo)
             if res["comps"]:
                 for compound in res["comps"]:
-                    # print(compound["other_names"][0])
                     name = compound["compound"]
                     item = {
                         "keyword": name,
@@ -76,7 +71,6 @@ async def search_results(
                         "data": json.dumps(compound, sort_keys=True, indent=4),
                     }
                     searched_results.append(item)
-            # print(searched_results)
         except KeyError:
             pass
     else:
@@ -85,7 +79,6 @@ async def search_results(
         filters = f"(elements HAS ALL {elements_str})"
         res = requests.get(search_url_base, params=dict(
             filter=filters, page_limit=10)).json()
-        #print(res)
         try:
             for entry in res["data"]:
                 attrs = entry["attributes"]
@@ -100,7 +93,6 @@ async def search_results(
             return []
         except KeyError:
             return ["Please try entering another keywords"]
-    #print(searched_results)
     return searched_results
 
 
@@ -180,5 +172,3 @@ def search_api(platform_name):
     return query_base_url
 
 
-#print(search_api(platform_name='Materials Project',results_type='structures'))
-#print(searching(search_string ='carbon',platform_name='JARVIS_DFT',results_type='structures'))
