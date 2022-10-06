@@ -12,6 +12,7 @@ router = APIRouter()
 # pylint:disable=line-too-long
 # pylint: disable=too-many-locals
 
+
 @router.get("/test")
 async def test():
     """
@@ -25,14 +26,11 @@ async def search_results(
         search_string: str,
         platform_name: str):
     """helps to connect to data platforms"""
-    print(platform_name)
     search_url_base = search_api(platform_name)
-    print(search_url_base)
     searched_results = []
     if platform_name == "PUBCHEM":
         base_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{search_string}/record/JSON?callback=pubchem_callback"
         res_base = requests.get(base_url, params=dict(page_limit=10)).json()
-        # print(res)
         chemical_pubchem_results = res_base["PC_Compounds"][0]
         cid_id = chemical_pubchem_results.get(
             'id', {}).get('id', {}).get('cid')
@@ -45,23 +43,27 @@ async def search_results(
         name = property_pubchem[11]["value"]["sval"]
         name = ' '.join(w for w in re.split(r"\W", name)
                         if w)  # pylint: disable=W1401
+        chemical_data =json.dumps(itemgetter('atoms', 'coords', 'props')(chemical_pubchem_results), sort_keys=True, indent=4)
+        hazard_information =json.dumps(ghz_hazard_statements, sort_keys=True, indent=4)
+        data_results = {"id":cid_id,
+                "chemical_data": chemical_data,
+                "Hazard_information": hazard_information}
         item = {
             "keyword": name,
             "dataCreator": "PubChem",
             "URL": base_url,
-            "Hazard_information": json.dumps(ghz_hazard_statements, sort_keys=True, indent=4),
-            "data": json.dumps(itemgetter('atoms', 'coords', 'props')(chemical_pubchem_results), sort_keys=True, indent=4)
+            "data": json.dumps(data_results,sort_keys=True, separators=(', ', ': '), indent=4)
         }
         searched_results.append(item)
+        print(item["data"])
+
     elif platform_name == "CHEMEO":
         try:
             search_url_chemeo = f"{search_url_base}?q={search_string}"
             res = requests.get(search_url_chemeo).json()
             if res["comps"]:
                 for compound in res["comps"]:
-                    # print(compound["other_names"][0])
-                    name = compound["other_names"][0]
-                    print(name)
+                    name = compound["compound"]
                     item = {
                         "keyword": name,
                         "dataCreator": "Chemeo",
@@ -89,7 +91,8 @@ async def search_results(
                 searched_results.append(item)
         except ValueError:
             return []
-        #print(searched_results)
+        except KeyError:
+            return []
     return searched_results
 
 
@@ -134,7 +137,6 @@ def search_api(platform_name):
     if platform_name in optimade_platform_front:
         platform_string = optimade_platform_front.get(platform_name)
         query_base_url = f"https://optimade.{platform_string}/v1/structures"
-        print(query_base_url)
 
     elif platform_name in optimade_platform_end:
         platform_string = optimade_platform_end.get(platform_name)
