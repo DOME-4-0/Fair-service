@@ -55,6 +55,7 @@ async def search_results(
             "data": json.dumps(data_results,sort_keys=True, separators=(', ', ': '), indent=4)
         }
         searched_results.append(item)
+        print(item["data"])
 
     elif platform_name == "CHEMEO":
         try:
