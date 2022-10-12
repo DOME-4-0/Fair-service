@@ -60,7 +60,7 @@ async def search_results(
     elif platform_name == "CHEMEO":
         try:
             search_url_chemeo = f"{search_url_base}?q={search_string}"
-            res = requests.get(search_url_chemeo).json()
+            res = requests.get(search_url_chemeo,headers={"Authorization": "Bearer 6d767996_1922_4328_967e_82104b1ae6c9"}).json()
             if res["comps"]:
                 for compound in res["comps"]:
                     name = compound["compound"]
