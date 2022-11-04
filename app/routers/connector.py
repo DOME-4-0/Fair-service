@@ -9,9 +9,9 @@ from fastapi import APIRouter
 
 router = APIRouter()
 
+
 # pylint:disable=line-too-long
 # pylint: disable=too-many-locals
-
 
 @router.get("/test")
 async def test():
@@ -26,11 +26,14 @@ async def search_results(
         search_string: str,
         platform_name: str):
     """helps to connect to data platforms"""
+    print(platform_name)
     search_url_base = search_api(platform_name)
+    print(search_url_base)
     searched_results = []
     if platform_name == "PUBCHEM":
         base_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{search_string}/record/JSON?callback=pubchem_callback"
         res_base = requests.get(base_url, params=dict(page_limit=10)).json()
+        # print(res)
         chemical_pubchem_results = res_base["PC_Compounds"][0]
         cid_id = chemical_pubchem_results.get(
             'id', {}).get('id', {}).get('cid')
@@ -43,27 +46,30 @@ async def search_results(
         name = property_pubchem[11]["value"]["sval"]
         name = ' '.join(w for w in re.split(r"\W", name)
                         if w)  # pylint: disable=W1401
-        chemical_data =json.dumps(itemgetter('atoms', 'coords', 'props')(chemical_pubchem_results), sort_keys=True, indent=4)
-        hazard_information =json.dumps(ghz_hazard_statements, sort_keys=True, indent=4)
-        data_results = {"id":cid_id,
-                "chemical_data": chemical_data,
-                "Hazard_information": hazard_information}
+        chemical_data = json.dumps(itemgetter('atoms', 'coords', 'props')(chemical_pubchem_results), sort_keys=True,
+                                   indent=4)
+        hazard_information = json.dumps(ghz_hazard_statements, sort_keys=True, indent=4)
+        data_results = {"id": cid_id,
+                        "chemical_data": chemical_data,
+                        "Hazard_information": hazard_information}
         item = {
             "keyword": name,
             "dataCreator": "PubChem",
             "URL": base_url,
-            "data": json.dumps(data_results,sort_keys=True, separators=(', ', ': '), indent=4)
+            "data": json.dumps(data_results, sort_keys=True, separators=(', ', ': '), indent=4)
         }
         searched_results.append(item)
         print(item["data"])
-
     elif platform_name == "CHEMEO":
         try:
             search_url_chemeo = f"{search_url_base}?q={search_string}"
-            res = requests.get(search_url_chemeo,headers={"Authorization": "Bearer 6d767996_1922_4328_967e_82104b1ae6c9"}).json()
+            res = requests.get(search_url_chemeo,
+                               headers={"Authorization": "Bearer 6d767996_1922_4328_967e_82104b1ae6c9"}).json()
             if res["comps"]:
                 for compound in res["comps"]:
-                    name = compound["compound"]
+                    # print(compound["other_names"][0])
+                    name = compound["other_names"][0]
+                    print(name)
                     item = {
                         "keyword": name,
                         "dataCreator": "Chemeo",
@@ -71,6 +77,7 @@ async def search_results(
                         "data": json.dumps(compound, sort_keys=True, indent=4),
                     }
                     searched_results.append(item)
+            print(searched_results)
         except KeyError:
             pass
     else:
@@ -85,14 +92,13 @@ async def search_results(
                 item = {
                     "keyword": attrs["chemical_formula_descriptive"],
                     "dataCreator": platform_name,
-                    "URL": search_url_base+str(entry["id"]),
+                    "URL": search_url_base + str(entry["id"]),
                     "data": json.dumps(entry, sort_keys=True, indent=4),
                 }
                 searched_results.append(item)
         except ValueError:
             return []
-        except KeyError:
-            return []
+    print(searched_results)
     return searched_results
 
 
@@ -133,10 +139,11 @@ def search_api(platform_name):
                              'THE_OPEN_QUANTUM_MATERIALS': 'oqmd.org'}
     new_optimade_cod_api = {'THEORETICAL_CRYSTALLOGRAPHY_OPEN_DATABASE': 'crystallography.net/tcod',
                             'CRYSTALLOGRAPHY': 'crystallography.net/cod'}
-    #optimade_results_types = ['structures', 'references', 'info', 'Links']
+    # optimade_results_types = ['structures', 'references', 'info', 'Links']
     if platform_name in optimade_platform_front:
         platform_string = optimade_platform_front.get(platform_name)
         query_base_url = f"https://optimade.{platform_string}/v1/structures"
+        print(query_base_url)
 
     elif platform_name in optimade_platform_end:
         platform_string = optimade_platform_end.get(platform_name)
@@ -147,10 +154,10 @@ def search_api(platform_name):
         query_base_url = f"https://www.{platform_string}/optimade/v1.1.0/structures"
     # if results_type == "references":
     #    query_base_url_references = query_base_url+"references"
-#
+    #
     # if results_type == "info":
     #    query_base_url_info = query_base_url+"info"
-#
+    #
     # if results_type == "Links":
     #    query_base_url_links = query_base_url+"links"
 
@@ -171,5 +178,37 @@ def search_api(platform_name):
     return query_base_url
 
 
-#print(search_api(platform_name='Materials Project',results_type='structures'))
-#print(searching(search_string ='carbon',platform_name='JARVIS_DFT',results_type='structures'))
+# print(search_api(platform_name='Materials Project',results_type='structures'))
+# print(searching(search_string ='carbon',platform_name='JARVIS_DFT',results_type='structures'))
+
+
+@router.get("/fair")
+async def return_raw_results(
+        search_string: str,
+        platform_name: str):
+    """helps to connect to data platforms"""
+    search_url_base = search_api(platform_name)
+    if platform_name == "PUBCHEM":
+        base_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{search_string}/record/JSON?callback=pubchem_callback"
+        res_base = requests.get(base_url, params=dict(page_limit=10)).json()
+        chemical_pubchem_results = res_base["PC_Compounds"][0]
+        cid_id = chemical_pubchem_results.get(
+            'id', {}).get('id', {}).get('cid')
+        pubchem_chem_hazard_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/{cid_id}/JSON/?response_type=display&heading=GHS%20Classification"
+        print(pubchem_chem_hazard_url)
+        res = requests.get(
+            pubchem_chem_hazard_url, params=dict(page_limit=10)).json()
+    elif platform_name == "CHEMEO":
+        try:
+            search_url_chemeo = f"{search_url_base}?q={search_string}"
+            res = requests.get(search_url_chemeo,
+                               headers={"Authorization": "Bearer 6d767996_1922_4328_967e_82104b1ae6c9"}).json()
+        except KeyError:
+            pass
+    else:
+        elements = search_string_split(search_string)
+        elements_str = ", ".join([f'"{el}"' for el in elements])
+        filters = f"(elements HAS ALL {elements_str})"
+        res = requests.get(search_url_base, params=dict(
+            filter=filters, page_limit=10)).json()
+    return res

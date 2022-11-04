@@ -1,4 +1,4 @@
-FROM python:3.8.3-slim-buster as base
+FROM python:3.7-slim-buster as base
 
 # Prevent writing .pyc files on the import of source modules
 # and set unbuffered mode to ensure logging outputs
