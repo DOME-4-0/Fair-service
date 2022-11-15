@@ -13,94 +13,6 @@ router = APIRouter()
 # pylint:disable=line-too-long
 # pylint: disable=too-many-locals
 
-@router.get("/test")
-async def test():
-    """
-    test endpoint
-    """
-    return {"msg": "Hello World from connector service"}
-
-
-@router.get("/results")
-async def search_results(
-        search_string: str,
-        platform_name: str):
-    """helps to connect to data platforms"""
-    print(platform_name)
-    search_url_base = search_api(platform_name)
-    print(search_url_base)
-    searched_results = []
-    if platform_name == "PUBCHEM":
-        base_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{search_string}/record/JSON?callback=pubchem_callback"
-        res_base = requests.get(base_url, params=dict(page_limit=10)).json()
-        # print(res)
-        chemical_pubchem_results = res_base["PC_Compounds"][0]
-        cid_id = chemical_pubchem_results.get(
-            'id', {}).get('id', {}).get('cid')
-        pubchem_chem_hazard_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/{cid_id}/JSON/?response_type=display&heading=GHS%20Classification"
-        res_chemical_hazard = requests.get(
-            pubchem_chem_hazard_url, params=dict(page_limit=10)).json()
-        ghz_hazard_statements = res_chemical_hazard['Record']['Section'][0][
-            'Section'][0]['Section'][0]['Information'][2]['Value']['StringWithMarkup']
-        property_pubchem = chemical_pubchem_results.get('props')
-        name = property_pubchem[11]["value"]["sval"]
-        name = ' '.join(w for w in re.split(r"\W", name)
-                        if w)  # pylint: disable=W1401
-        chemical_data = json.dumps(itemgetter('atoms', 'coords', 'props')(chemical_pubchem_results), sort_keys=True,
-                                   indent=4)
-        hazard_information = json.dumps(ghz_hazard_statements, sort_keys=True, indent=4)
-        data_results = {"id": cid_id,
-                        "chemical_data": chemical_data,
-                        "Hazard_information": hazard_information}
-        item = {
-            "keyword": name,
-            "dataCreator": "PubChem",
-            "URL": base_url,
-            "data": json.dumps(data_results, sort_keys=True, separators=(', ', ': '), indent=4)
-        }
-        searched_results.append(item)
-        print(item["data"])
-    elif platform_name == "CHEMEO":
-        try:
-            search_url_chemeo = f"{search_url_base}?q={search_string}"
-            res = requests.get(search_url_chemeo,
-                               headers={"Authorization": "Bearer 6d767996_1922_4328_967e_82104b1ae6c9"}).json()
-            if res["comps"]:
-                for compound in res["comps"]:
-                    # print(compound["other_names"][0])
-                    name = compound["other_names"][0]
-                    print(name)
-                    item = {
-                        "keyword": name,
-                        "dataCreator": "Chemeo",
-                        "URL": f"https://www.chemeo.com/api/v1/search?q={name}",
-                        "data": json.dumps(compound, sort_keys=True, indent=4),
-                    }
-                    searched_results.append(item)
-            print(searched_results)
-        except KeyError:
-            pass
-    else:
-        elements = search_string_split(search_string)
-        elements_str = ", ".join([f'"{el}"' for el in elements])
-        filters = f"(elements HAS ALL {elements_str})"
-        res = requests.get(search_url_base, params=dict(
-            filter=filters, page_limit=10)).json()
-        try:
-            for entry in res["data"]:
-                attrs = entry["attributes"]
-                item = {
-                    "keyword": attrs["chemical_formula_descriptive"],
-                    "dataCreator": platform_name,
-                    "URL": search_url_base + str(entry["id"]),
-                    "data": json.dumps(entry, sort_keys=True, indent=4),
-                }
-                searched_results.append(item)
-        except ValueError:
-            return []
-    print(searched_results)
-    return searched_results
-
 
 def search_string_split(search_string: str) -> List:
     """Split the search string"""
@@ -178,10 +90,6 @@ def search_api(platform_name):
     return query_base_url
 
 
-# print(search_api(platform_name='Materials Project',results_type='structures'))
-# print(searching(search_string ='carbon',platform_name='JARVIS_DFT',results_type='structures'))
-
-
 @router.get("/fair")
 async def return_raw_results(
         search_string: str,
@@ -211,4 +119,5 @@ async def return_raw_results(
         filters = f"(elements HAS ALL {elements_str})"
         res = requests.get(search_url_base, params=dict(
             filter=filters, page_limit=10)).json()
+
     return res
